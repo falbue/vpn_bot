@@ -47,10 +47,8 @@ def create_config(tta_data):
         print(
             "Ошибка: команда 'openvpn' не найдена. Убедитесь, что OpenVPN установлен."
         )
-        sys.exit(1)
     except Exception as e:
         print(f"Произошла ошибка: {e}")
-        sys.exit(1)
     return
 
 
