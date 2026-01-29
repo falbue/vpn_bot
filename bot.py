@@ -1,55 +1,40 @@
+import json
 import TelegramTextApp
-from TelegramTextApp.utils.database import SQL_request as SQL  # type: ignore
-import subprocess
-import sys
+import api
 
 
-def create_tokens():
-    SQL("""
-    CREATE TABLE IF NOT EXISTS configs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        config TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        active_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        active BOOLEAN DEFAULT 1,
-        FOREIGN KEY (user_id) REFERENCES TTA(id)
-    )""")
+def get_inbounds(tta):
+    inbounds = api.get_inbounds()
+    if inbounds is None:
+        return {}
+    keyboard = {}
+    for inbound in inbounds:
+        keyboard[f"role:admin|inbound|{inbound['id']}"] = f"{inbound['remark']}"
+    return keyboard
 
 
-create_tokens()
+def get_inbound(tta):
+    inbounds = api.get_inbound(tta.inbound_id)
+    if inbounds is None:
+        return {"text": "Ошибка при получении inbound'а"}
+    inbounds["streamSettings"] = json.loads(inbounds["streamSettings"])
+    inbounds["settings"] = json.loads(inbounds["settings"])
+    inbounds["num_clients"] = len(inbounds["settings"]["clients"])
+    return inbounds
 
 
-def create_config(tta_data):
-    username = tta_data.get("username", "NoUsername")
-    last_id = SQL("SELECT * FROM configs ORDER BY id DESC LIMIT 1;", fetch="one")
-
-    try:
-        # Запускаем команду openvpn
-        process = subprocess.Popen(
-            ["openvpn"],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
+def inbound_clients(tta):
+    inbound = api.get_inbound(tta.inbound_id)
+    if inbound is None:
+        return {"text": "Ошибка при получении inbound'а"}
+    inbound["settings"] = json.loads(inbound["settings"])
+    clients = inbound["settings"]["clients"]
+    keyboard = {}
+    for client in clients:
+        keyboard[f"inbound|{inbound['id']}|client|{client['id']}"] = (
+            f"{client['email']}"
         )
-
-        config_name = f"{username}_{last_id[0] if last_id else 0}"
-
-        # Отправляем '1' для выбора пункта "Add a new client"
-        stdout, stderr = process.communicate(input=f"1\n{config_name}\n")
-
-        SQL(
-            f"INSERT INTO configs (user_id, config) VALUES ({tta_data['id']}, '{config_name}');"
-        )
-
-    except FileNotFoundError:
-        print(
-            "Ошибка: команда 'openvpn' не найдена. Убедитесь, что OpenVPN установлен."
-        )
-    except Exception as e:
-        print(f"Произошла ошибка: {e}")
-    return
+    return keyboard
 
 
 if __name__ == "__main__":
