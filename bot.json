@@ -14,10 +14,20 @@
         "main": {
             "text": "Главное меню",
             "keyboard": {
-                "create_inbounds": "Создать подключение",
+                "test_inbounds": "Проверить подключение",
+                "create_inbounds": "\\Создать подключение",
                 "my_inbounds": "Мои подключения",
                 "role:admin|admin": "Админ панель"
             }
+        },
+        "test_inbounds": {
+            "text": "{get_test_token.error_message|hide}\n\nВам будет доступен 1 гигабайт трафика\n\n{get_test_token.client}",
+            "function": "get_test_token",
+            "return": "main"
+        },
+        "my_inbounds": {
+            "text": "Мои подключения",
+            "return": "main"
         },
         "admin": {
             "text": "Админ панель",
@@ -39,17 +49,19 @@
             "text": "Информация о подключении\n\n*Имя:* {get_inbound.remark}\n*Тип:* {get_inbound.streamSettings.network}\n*Порт:* {get_inbound.port}\n*Количество клиентов:* {get_inbound.num_clients}",
             "function": "get_inbound",
             "keyboard": {
-                "add_client|{inbound_id}": "Добавить клиента",
-                "placeholder": "---",
-                "function": "inbound_clients"
+                "add_client|{inbound['id']}": "Добавить клиента",
+                "function": "\\inbound_clients"
             },
             "return": "admin_inbounds"
         },
-        "my_inbounds": {
-            "text": "Мои подключения",
+        "inbound|{inbound_id}|{inbound_client_id}": {
+            "loading": true,
+            "text": "Информация о клиенте\n\n*Email:* {get_inbound_client.email}\n*ID:* {get_inbound_client.id}\n*Дата создания:* {get_inbound_client.created_at}\n*Дата истечения:* {get_inbound_client.expire_at}\n\n*Конфигурация:*\n`{get_inbound_client.config}`",
+            "function": "get_inbound_client",
             "keyboard": {
-                "return": "main"
-            }
+                "delete_inbound_client|{inbound_id}|{inbound_client_id}": "Удалить клиента"
+            },
+            "return": "inbound|{inbound_id}"
         }
     },
     "variables": {
