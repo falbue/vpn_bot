@@ -69,7 +69,7 @@ def get_client(inbound_id, tg_id, placeholder=""):
     clients = data["settings"]
     clients = json.loads(clients)["clients"]
     for client in clients:
-        if client["email"] == placeholder + tg_id:
+        if client["email"] == placeholder + str(tg_id):
             return client
     return None
 

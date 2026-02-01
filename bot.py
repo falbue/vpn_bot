@@ -53,12 +53,12 @@ def get_inbound_client(tta):
 
 def get_test_token(tta):
     inbound_id = config.TEST_INBOUND
-    client = api.get_client(inbound_id, tta.user.telegram_id, placeholder="test_")
+    client = api.get_client(inbound_id, tta.user.telegram_id, placeholder="test-")
     if client is None:
         api.create_client(
             inbound_id, tta.user.telegram_id, tta.user.username, total_gb=1
         )
-        client = api.get_client(inbound_id, tta.user.telegram_id, placeholder="test_")
+        client = api.get_client(inbound_id, tta.user.telegram_id, placeholder="test-")
     return {"client": client}
 
 
